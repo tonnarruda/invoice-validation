@@ -1,0 +1,29 @@
+name: Validacao Titulo PR
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+
+jobs:
+  pr-title-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Validacao Titulo PR
+        run: |
+          # Captura o título do PR
+          PR_TITLE=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
+
+          # Defina o padrão desejado para o título do PR
+          TITLE_REGEX="^\[[a-zA-Z0-9-]+\-[0-9]+\] .+"
+
+          # Verifica se o título corresponde ao padrão
+          if ! [[ "$PR_TITLE" =~ $TITLE_REGEX ]]; then
+            echo "Erro: O título do PR deve ter o padrão '[<prefixo>-<numeroda task no clickup>] descrição da task', ex:., '[QA-1234] Fix login issue' "
+            exit 1 
+          fi
